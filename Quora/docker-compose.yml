@@ -1,0 +1,37 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9094:9094"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/QuoraBackend  # Use 'mysql' instead of localhost
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 304506
+    depends_on:
+      mysql:
+        condition: service_healthy  # Wait until mysql service is healthy
+    # command: ["./wait-for-it.sh", "mysql:3306", "--", "java", "-jar", "Quora-0.0.1-SNAPSHOT.jar"]
+
+  mysql:
+    image: mysql:8.0
+    container_name: Quora-MySQL
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 304506
+      MYSQL_DATABASE: QuoraBackend
+      MYSQL_USER: quora_user
+      MYSQL_PASSWORD: 304506
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p304506"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+volumes:
+  mysql-data:
